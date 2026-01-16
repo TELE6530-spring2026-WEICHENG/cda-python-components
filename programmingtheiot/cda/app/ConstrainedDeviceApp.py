@@ -87,7 +87,7 @@ def main():
 		logging.info('Parsed configuration file arg: %s', configFile)
 	except:
 		logging.info('No arguments to parse.')
-
+ 
 	# init ConfigUtil
 	configUtil = ConfigUtil(configFile)
 	cda = None
