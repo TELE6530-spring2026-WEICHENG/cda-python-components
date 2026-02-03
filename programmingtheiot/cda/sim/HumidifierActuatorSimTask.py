@@ -10,6 +10,8 @@
 # Programming the Internet of Things project.
 # 
 
+import logging
+from programmingtheiot.common import ConfigConst
 from programmingtheiot.data.ActuatorData import ActuatorData
 from programmingtheiot.cda.sim.BaseActuatorSimTask import BaseActuatorSimTask
 
@@ -24,5 +26,15 @@ class HumidifierActuatorSimTask(BaseActuatorSimTask):
 	"""
 
 	def __init__(self):
-		pass
-		
+		super(HumidifierActuatorSimTask, self).__init__(name = ConfigConst.HUMIDIFIER_ACTUATOR_NAME, typeID = ConfigConst.HUMIDIFIER_ACTUATOR_TYPE, simpleName="Humidifier")
+
+	def _activateActuator(self, val: float = ConfigConst.DEFAULT_VAL, stateData: str = None) -> int:
+		duty = max(0.0, min(100.0, float(val)))
+
+		logging.info("[Humidifier] ON duty=%.1f state=%s", duty, stateData)
+
+		return 0
+
+	def _deactivateActuator(self, val: float = ConfigConst.DEFAULT_VAL, stateData: str = None) -> int:
+		logging.info("[Humidifier] OFF state=%s", stateData)
+		return 0

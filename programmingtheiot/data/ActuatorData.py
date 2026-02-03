@@ -10,10 +10,12 @@
 # Programming the Internet of Things project.
 # 
 
+import logging
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.data.BaseIotData import BaseIotData
 
+logging.basicConfig(format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 class ActuatorData(BaseIotData):
 	"""
 	Shell representation of class for student implementation.
@@ -22,32 +24,63 @@ class ActuatorData(BaseIotData):
 
 	def __init__(self, typeID: int = ConfigConst.DEFAULT_ACTUATOR_TYPE, name = ConfigConst.NOT_SET, d = None):
 		super(ActuatorData, self).__init__(name = name, typeID = typeID, d = d)
-		pass
+
+		self.value = ConfigConst.DEFAULT_VAL
+		self.command = ConfigConst.DEFAULT_COMMAND
+		self.stateData = ""
+		self.isResponse = False
+
 	
 	def getCommand(self) -> int:
-		pass
+		return self.command
 	
 	def getStateData(self) -> str:
-		pass
+		return self.stateData
 	
 	def getValue(self) -> float:
-		pass
+		return self.value
 	
 	def isResponseFlagEnabled(self) -> bool:
-		return False
+		return self.isResponse
 	
 	def setCommand(self, command: int):
-		pass
+		self.command = command
+		self.updateTimeStamp()
 	
 	def setAsResponse(self):
-		pass
+		self.isResponse = True
+		self.updateTimeStamp()
 		
 	def setStateData(self, stateData: str):
-		pass
+		if stateData:
+			self.stateData = stateData
+			self.updateTimeStamp()
 	
 	def setValue(self, val: float):
-		pass
+		self.value = val
+		self.updateTimeStamp()
 		
 	def _handleUpdateData(self, data):
-		pass
+		if data and isinstance(data, ActuatorData):
+			self.command = data.getCommand()
+			self.stateData = data.getStateData()
+			self.value = data.getValue()
+			self.isResponse = data.isResponseFlagEnabled()
+		else:
+			self.setStatusCode(-1)
+			logging.error("Invalid data object passed to ActuatorData _handleUpdateData.")
+			return
+
+	def __str__(self):
+		"""
+		Returns a string representation of this instance.
+		"""
+		baseStr = super().__str__()
+		return '{},{}={},{}={},{}={},{}={}'.format(
+			baseStr,
+			'command', self.command,
+			'value', self.value,
+			'stateData', self.stateData,
+			'responseFlag', self.isResponse
+		)
 		

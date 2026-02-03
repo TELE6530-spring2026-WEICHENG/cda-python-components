@@ -10,10 +10,13 @@
 # Programming the Internet of Things project.
 # 
 
+import logging
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.data.BaseIotData import BaseIotData
 
+
+logging.basicConfig(format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 class SensorData(BaseIotData):
 	"""
 	Shell representation of class for student implementation.
@@ -22,7 +25,7 @@ class SensorData(BaseIotData):
 		
 	def __init__(self, typeID: int = ConfigConst.DEFAULT_SENSOR_TYPE, name = ConfigConst.NOT_SET, d = None):
 		super(SensorData, self).__init__(name = name, typeID = typeID, d = d)
-		pass
+		self.value = ConfigConst.DEFAULT_VAL
 	
 	def getSensorType(self) -> int:
 		"""
@@ -33,10 +36,24 @@ class SensorData(BaseIotData):
 		return self.sensorType
 	
 	def getValue(self) -> float:
-		pass
+		return self.value
 	
 	def setValue(self, newVal: float):
-		pass
+		self.value = newVal
+		self.updateTimeStamp()
 		
 	def _handleUpdateData(self, data):
-		pass
+		if data and isinstance(data, SensorData):
+			self.value = data.getValue()
+		else:
+			self.hasError = True
+			logging.error("Invalid data object passed to SensorData _handleUpdateData.")
+			return
+
+	def __str__(self):
+		"""
+		Returns a string representation of this instance.
+		
+		@return str
+		"""
+		return "SensorData [name=%s, typeID=%d, value=%.2f, timeStamp=%s]" % (self.name, self.typeID, self.value, self.timeStamp)
