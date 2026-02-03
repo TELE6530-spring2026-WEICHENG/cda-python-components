@@ -10,10 +10,12 @@
 # Programming the Internet of Things project.
 # 
 
+import logging
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.data.BaseIotData import BaseIotData
 
+logging.basicConfig(format = '%(asctime)s:%(name)s:%(levelname)s:%(message)s', level = logging.DEBUG)
 class SystemPerformanceData(BaseIotData):
 	"""
 	Shell representation of class for student implementation.
@@ -23,25 +25,45 @@ class SystemPerformanceData(BaseIotData):
 	
 	def __init__(self, d = None):
 		super(SystemPerformanceData, self).__init__(name = ConfigConst.SYSTEM_PERF_MSG, typeID = ConfigConst.SYSTEM_PERF_TYPE, d = d)
-		pass
+		self.cpuUtilization = ConfigConst.DEFAULT_VAL
+		self.diskUtilization = ConfigConst.DEFAULT_VAL
+		self.memoryUtilization = ConfigConst.DEFAULT_VAL
 	
 	def getCpuUtilization(self):
-		pass
+		return self.cpuUtilization
 	
 	def getDiskUtilization(self):
-		pass
+		return self.diskUtilization
 	
 	def getMemoryUtilization(self):
-		pass
+		return self.memoryUtilization
 	
 	def setCpuUtilization(self, cpuUtil):
-		pass
+		self.cpuUtilization = cpuUtil
+		self.updateTimeStamp()
 	
 	def setDiskUtilization(self, diskUtil):
-		pass
+		self.diskUtilization = diskUtil
+		self.updateTimeStamp()
 	
 	def setMemoryUtilization(self, memUtil):
-		pass
+		self.memoryUtilization = memUtil
+		self.updateTimeStamp()
 	
 	def _handleUpdateData(self, data):
-		pass
+		if data and isinstance(data, SystemPerformanceData):
+			self.cpuUtilization = data.getCpuUtilization()
+			self.diskUtilization = data.getDiskUtilization()
+			self.memoryUtilization = data.getMemoryUtilization()
+		else:
+			self.hasError = True
+			logging.error("Invalid data object passed to SystemPerformanceData _handleUpdateData.")
+			return
+
+	def __str__(self):
+		"""
+		Returns a string representation of this instance.
+		
+		@return str
+		"""
+		return "SystemPerformanceData [name=%s, typeID=%d, cpuUtilization=%.2f, diskUtilization=%.2f, memoryUtilization=%.2f, timeStamp=%s]" % (self.name, self.typeID, self.cpuUtilization, self.diskUtilization, self.memoryUtilization, self.timeStamp)
