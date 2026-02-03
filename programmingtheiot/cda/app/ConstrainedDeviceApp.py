@@ -28,6 +28,7 @@ class ConstrainedDeviceApp():
 	"""
 	Definition of the ConstrainedDeviceApp class.
 	
+ 
 	"""
 	
 	def __init__(self):
