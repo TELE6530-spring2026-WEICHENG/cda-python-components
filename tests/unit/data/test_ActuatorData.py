@@ -24,7 +24,7 @@ class ActuatorDataTest(unittest.TestCase):
 	"""
 	
 	DEFAULT_NAME = "ActuatorDataFooBar"
-	DEFAULT_STATE_DATA = ""
+	DEFAULT_STATE_DATA = "{state: None}"
 	DEFAULT_VALUE = 15.2
 	
 	@classmethod
