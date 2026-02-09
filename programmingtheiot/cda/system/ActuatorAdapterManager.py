@@ -128,3 +128,26 @@ class ActuatorAdapterManager(object):
             if self.useSimulator:
                 self.humidifierActuator = HumidifierActuatorSimTask()
                 self.hvacActuator = HvacActuatorSimTask()
+        else:
+            hueModule = import_module(
+                "programmingtheiot.cda.emulated.actuator.HumidifierEmulatorTask",
+                "HumidifierEmulatorTask",
+            )
+            hueClazz = getattr(hueModule, "HumidifierEmulatorTask")
+            self.humidifierActuator = hueClazz()
+
+            # create the HVAC actuator emulator
+            hveModule = import_module(
+                "programmingtheiot.cda.emulated.actuator.HvacEmulatorTask",
+                "HvacEmulatorTask",
+            )
+            hveClazz = getattr(hveModule, "HvacEmulatorTask")
+            self.hvacActuator = hveClazz()
+
+            # create the LED display actuator emulator
+            leDisplayModule = import_module(
+                "programmingtheiot.cda.emulated.LedDisplayEmulatorTask",
+                "LedDisplayEmulatorTask",
+            )
+            leClazz = getattr(leDisplayModule, "LedDisplayEmulatorTask")
+            self.ledDisplayActuator = leClazz()
