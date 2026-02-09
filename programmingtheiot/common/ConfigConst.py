@@ -272,6 +272,8 @@ TEMP_SIM_FLOOR_KEY       = 'tempSimFloor'
 TEMP_SIM_CEILING_KEY     = 'tempSimCeiling'
 
 HANDLE_TEMP_CHANGE_ON_DEVICE_KEY = 'handleTempChangeOnDevice'
+
+DEFAULT_ENABLE_ACTUATION = True
 TRIGGER_HVAC_TEMP_FLOOR_KEY   = 'triggerHvacTempFloor'
 TRIGGER_HVAC_TEMP_CEILING_KEY = 'triggerHvacTempCeiling'
 

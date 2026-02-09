@@ -219,9 +219,10 @@ class BaseIotData(object):
 			self.setLongitude(data.getLongitude())
 			self.setLocationID(data.getLocationID())
 			
-			self.updateTimeStamp()
+			
 			
 			self._handleUpdateData(data)
+			self.updateTimeStamp()
 		
 	def updateTimeStamp(self):
 		"""
