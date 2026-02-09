@@ -49,10 +49,10 @@ class BaseActuatorSimTask:
         """
         This can return the current ActuatorData response instance or a copy.
         """
-        pass
+        return self.latestActuatorResponse
 
     def getSimpleName(self) -> str:
-        pass
+        return self.simpleName
 
     def updateActuator(self, data: ActuatorData) -> ActuatorData:
         """
@@ -93,9 +93,10 @@ class BaseActuatorSimTask:
                 )
             else:
                 logging.debug(
-                    "New actuator command and value to be applied: %s %s",
+                    "New actuator command and value to be applied: command: %s value: %s state: %s",
                     str(curCommand),
                     str(curVal),
+                    str(curState),
                 )
                 if curCommand == ConfigConst.COMMAND_ON:
                     logging.info("Activating actuator...")

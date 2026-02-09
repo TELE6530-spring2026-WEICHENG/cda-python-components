@@ -192,7 +192,7 @@ class DeviceDataManager(IDataMessageListener):
         @param data The incoming SensorData message.
         @return boolean
         """
-        if data:
+        if data and isinstance(data, SensorData):
             logging.debug(
                 "Incoming sensor data received (from sensor manager): " + str(data)
             )

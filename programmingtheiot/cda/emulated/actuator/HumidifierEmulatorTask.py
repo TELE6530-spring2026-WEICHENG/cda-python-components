@@ -11,6 +11,7 @@
 #
 
 import logging
+
 from time import sleep
 
 import programmingtheiot.common.ConfigConst as ConfigConst
@@ -21,17 +22,17 @@ from programmingtheiot.cda.sim.BaseActuatorSimTask import BaseActuatorSimTask
 from pisense import SenseHAT
 
 
-class LedDisplayEmulatorTask(BaseActuatorSimTask):
+class HumidifierEmulatorTask(BaseActuatorSimTask):
     """
     Shell representation of class for student implementation.
 
     """
 
     def __init__(self):
-        super(LedDisplayEmulatorTask, self).__init__(
-            name=ConfigConst.LED_ACTUATOR_NAME,
-            typeID=ConfigConst.LED_DISPLAY_ACTUATOR_TYPE,
-            simpleName="LED_DISPLAY",
+        super(HumidifierEmulatorTask, self).__init__(
+            name=ConfigConst.HUMIDIFIER_ACTUATOR_NAME,
+            typeID=ConfigConst.HUMIDIFIER_ACTUATOR_TYPE,
+            simpleName="HUMIDIFIER",
         )
 
         enableEmulation = ConfigUtil().getBoolean(

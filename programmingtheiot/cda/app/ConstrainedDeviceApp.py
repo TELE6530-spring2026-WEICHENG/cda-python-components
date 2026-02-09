@@ -29,7 +29,6 @@ logging.basicConfig(
     format="%(asctime)s:%(name)s:%(levelname)s:%(message)s", level=logging.DEBUG
 )
 
-
 class ConstrainedDeviceApp:
     """
     Definition of the ConstrainedDeviceApp class.
