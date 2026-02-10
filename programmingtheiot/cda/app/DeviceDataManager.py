@@ -94,7 +94,7 @@ class DeviceDataManager(IDataMessageListener):
 
     def getLatestActuatorDataResponseFromCache(self, name: str = None) -> ActuatorData:
         """
-        Retrieves the named actuator data (response) item from the internal data cache.
+        Retrieves the named actuator data (response) item from the internal data  cache.
 
         @param name
         @return ActuatorData
@@ -131,7 +131,7 @@ class DeviceDataManager(IDataMessageListener):
         """
         logging.info("Actuator data: " + str(data))
 
-        if data:
+        if data and isinstance(data, ActuatorData):
             logging.info("Processing actuator command message.")
             return self.actuatorAdapterMgr.sendActuatorCommand(data)
         else:
