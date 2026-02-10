@@ -1,14 +1,14 @@
 #####
-# 
+#
 # This class is part of the Programming the Internet of Things
 # project, and is available via the MIT License, which can be
 # found in the LICENSE file at the top level of this repository.
-# 
+#
 # You may find it more helpful to your design to adjust the
 # functionality, constants and interfaces (if there are any)
 # provided within in order to meet the needs of your specific
 # Programming the Internet of Things project.
-# 
+#
 
 import logging
 
@@ -26,60 +26,95 @@ from programmingtheiot.data.SystemPerformanceData import SystemPerformanceData
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+
 class SystemPerformanceManager(object):
-	"""
-	Shell representation of class for student implementation.
-	
-	"""
+    """
+    Shell representation of class for student implementation.
 
-	def __init__(self):
-		configUtil = ConfigUtil()
-	
-		self.pollRate = configUtil.getInteger(section = ConfigConst.CONSTRAINED_DEVICE, key = ConfigConst.POLL_CYCLES_KEY, defaultVal = ConfigConst.DEFAULT_POLL_CYCLES)
-		
-		self.locationID = \
-			configUtil.getProperty( \
-				section = ConfigConst.CONSTRAINED_DEVICE, key = ConfigConst.DEVICE_LOCATION_ID_KEY, defaultVal = ConfigConst.NOT_SET)
-		
-		if self.pollRate <= 0:
-			self.pollRate = ConfigConst.DEFAULT_POLL_CYCLES
-			
-		self.dataMsgListener = None
+    """
 
+    def __init__(self):
+        configUtil = ConfigUtil()
 
-		# Run tasks on multi-thread scheduler
-		self.scheduler = BackgroundScheduler()
-		self.scheduler.add_job(self.handleTelemetry, 'interval', seconds = self.pollRate,
-            max_instances = 2, coalesce = True, misfire_grace_time = 15)
+        self.pollRate = configUtil.getInteger(
+            section=ConfigConst.CONSTRAINED_DEVICE,
+            key=ConfigConst.POLL_CYCLES_KEY,
+            defaultVal=ConfigConst.DEFAULT_POLL_CYCLES,
+        )
 
-		# System Performance Manager composites of multiple system util tasks
-		self.cpuUtilTask = SystemCpuUtilTask()
-		self.memUtilTask = SystemMemUtilTask()
+        self.locationID = configUtil.getProperty(
+            section=ConfigConst.CONSTRAINED_DEVICE,
+            key=ConfigConst.DEVICE_LOCATION_ID_KEY,
+            defaultVal=ConfigConst.NOT_SET,
+        )
 
-	def handleTelemetry(self):
-		cpuUtilPct = self.cpuUtilTask.getTelemetryValue()
-		memUtilPct = self.memUtilTask.getTelemetryValue()
-		
-		logging.debug('CPU utilization is %s percent, and memory utilization is %s percent.', str(cpuUtilPct), str(memUtilPct))
-			
-	def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
-		pass
-	
-	def startManager(self):
-		logging.info("Started SystemPerformanceManager.")
+        if self.pollRate <= 0:
+            self.pollRate = ConfigConst.DEFAULT_POLL_CYCLES
 
-		if not self.scheduler.running:
-			self.scheduler.start()
-			logging.info("Started SystemPerformanceManager.")
-		else:
-			logging.warning("SystemPerformanceManager scheduler already started. Ignoring.")
-		
-		
-	def stopManager(self):
-		logging.info("Stopped SystemPerformanceManager.")
+        self.dataMsgListener = None
 
-		try:
-			self.scheduler.shutdown()
-			logging.info("Stopped SystemPerformanceManager.")
-		except:
-			logging.warning("SystemPerformanceManager scheduler already stopped. Ignoring.")
+        # Run tasks on multi-thread scheduler
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.add_job(
+            self.handleTelemetry,
+            "interval",
+            seconds=self.pollRate,
+            max_instances=2,
+            coalesce=True,
+            misfire_grace_time=15,
+        )
+
+        # System Performance Manager composites of multiple system util tasks
+        self.cpuUtilTask = SystemCpuUtilTask()
+        self.memUtilTask = SystemMemUtilTask()
+
+    def handleTelemetry(self):
+        cpuUtilPct = self.cpuUtilTask.getTelemetryValue()
+        memUtilPct = self.memUtilTask.getTelemetryValue()
+
+        logging.debug(
+            "CPU utilization is %s percent, and memory utilization is %s percent.",
+            str(cpuUtilPct),
+            str(memUtilPct),
+        )
+
+        # Create DTO and send to listener
+        sysPerfData = SystemPerformanceData()
+        sysPerfData.setLocationID(self.locationID)
+        sysPerfData.setCpuUtilization(cpuUtilPct)
+        sysPerfData.setMemoryUtilization(memUtilPct)
+
+        if self.dataMsgListener:
+            self.dataMsgListener.handleSystemPerformanceMessage(data=sysPerfData)
+
+    def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
+        if listener and isinstance(listener, IDataMessageListener):
+            self.dataMsgListener = listener
+            return True
+        else:
+            logging.error(
+                "Invalid data message listener instance passed to SystemPerformanceManager."
+            )
+            return False
+
+    def startManager(self):
+        logging.info("Started SystemPerformanceManager.")
+
+        if not self.scheduler.running:
+            self.scheduler.start()
+            logging.info("Started SystemPerformanceManager.")
+        else:
+            logging.warning(
+                "SystemPerformanceManager scheduler already started. Ignoring."
+            )
+
+    def stopManager(self):
+        logging.info("Stopped SystemPerformanceManager.")
+
+        try:
+            self.scheduler.shutdown()
+            logging.info("Stopped SystemPerformanceManager.")
+        except:
+            logging.warning(
+                "SystemPerformanceManager scheduler already stopped. Ignoring."
+            )
