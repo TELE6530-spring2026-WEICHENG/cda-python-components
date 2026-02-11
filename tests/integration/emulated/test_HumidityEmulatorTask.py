@@ -15,7 +15,7 @@ from time import sleep
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.data.SensorData import SensorData
-from programmingtheiot.cda.emulated.HumiditySensorEmulatorTask import HumiditySensorEmulatorTask
+from programmingtheiot.cda.emulated.sensor.HumiditySensorEmulatorTask import HumiditySensorEmulatorTask
 
 class HumidityEmulatorTaskTest(unittest.TestCase):
 	"""

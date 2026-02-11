@@ -15,7 +15,7 @@ from time import sleep
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.data.SensorData import SensorData
-from programmingtheiot.cda.emulated.TemperatureSensorEmulatorTask import TemperatureSensorEmulatorTask
+from programmingtheiot.cda.emulated.sensor.TemperatureSensorEmulatorTask import TemperatureSensorEmulatorTask
 
 class TemperatureEmulatorTaskTest(unittest.TestCase):
 	"""

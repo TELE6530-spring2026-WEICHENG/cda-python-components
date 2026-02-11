@@ -15,7 +15,7 @@ from time import sleep
 import programmingtheiot.common.ConfigConst as ConfigConst
 
 from programmingtheiot.data.SensorData import SensorData
-from programmingtheiot.cda.emulated.PressureSensorEmulatorTask import PressureSensorEmulatorTask
+from programmingtheiot.cda.emulated.sensor.PressureSensorEmulatorTask import PressureSensorEmulatorTask
 
 class PressureEmulatorTaskTest(unittest.TestCase):
 	"""
