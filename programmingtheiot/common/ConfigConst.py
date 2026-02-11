@@ -272,10 +272,13 @@ TEMP_SIM_FLOOR_KEY       = 'tempSimFloor'
 TEMP_SIM_CEILING_KEY     = 'tempSimCeiling'
 
 HANDLE_TEMP_CHANGE_ON_DEVICE_KEY = 'handleTempChangeOnDevice'
+HANDLE_HUMIDITY_CHANGE_ON_DEVICE_KEY = 'handleHumidityChangeOnDevice'
 
 DEFAULT_ENABLE_ACTUATION = True
 TRIGGER_HVAC_TEMP_FLOOR_KEY   = 'triggerHvacTempFloor'
 TRIGGER_HVAC_TEMP_CEILING_KEY = 'triggerHvacTempCeiling'
+TRIGGER_HUMIDIFIER_FLOOR_KEY   = 'triggerHumidifierFloor'
+TRIGGER_HUMIDIFIER_CEILING_KEY = 'triggerHumidifierCeiling'
 
 RUN_FOREVER_KEY    = 'runForever'
 TEST_EMPTY_APP_KEY = 'testEmptyApp'

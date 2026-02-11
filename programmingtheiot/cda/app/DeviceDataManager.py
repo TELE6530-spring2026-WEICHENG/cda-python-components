@@ -54,6 +54,7 @@ class DeviceDataManager(IDataMessageListener):
             section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.ENABLE_SENSING_KEY
         )
 
+        # Get temperature change handling settings
         self.handleTempChangeOnDevice = self.configUtil.getBoolean(
             ConfigConst.CONSTRAINED_DEVICE, ConfigConst.HANDLE_TEMP_CHANGE_ON_DEVICE_KEY
         )
@@ -64,6 +65,20 @@ class DeviceDataManager(IDataMessageListener):
 
         self.triggerHvacTempCeiling = self.configUtil.getFloat(
             ConfigConst.CONSTRAINED_DEVICE, ConfigConst.TRIGGER_HVAC_TEMP_CEILING_KEY
+        )
+
+        # Get humidity change handling settings
+        self.handleHumidityChangeOnDevice = self.configUtil.getBoolean(
+            ConfigConst.CONSTRAINED_DEVICE,
+            ConfigConst.HANDLE_HUMIDITY_CHANGE_ON_DEVICE_KEY,
+        )
+
+        self.triggerHumidifierFloor = self.configUtil.getFloat(
+            ConfigConst.CONSTRAINED_DEVICE, ConfigConst.TRIGGER_HUMIDIFIER_FLOOR_KEY
+        )
+
+        self.triggerHumidifierCeiling = self.configUtil.getFloat(
+            ConfigConst.CONSTRAINED_DEVICE, ConfigConst.TRIGGER_HUMIDIFIER_CEILING_KEY
         )
 
         self.enableActuation = ConfigConst.DEFAULT_ENABLE_ACTUATION
@@ -262,6 +277,7 @@ class DeviceDataManager(IDataMessageListener):
         1) Check config: Is there a rule or flag that requires immediate processing of data?
         2) Act on data: If # 1 is true, determine what - if any - action is required, and execute.
         """
+        # Trigger HVAC actuation based on temperature change
         if (
             self.handleTempChangeOnDevice
             and data.getTypeID() == ConfigConst.TEMP_SENSOR_TYPE
@@ -282,6 +298,32 @@ class DeviceDataManager(IDataMessageListener):
                 ad.setValue(self.triggerHvacTempFloor)
             else:
                 ad.setCommand(ConfigConst.COMMAND_OFF)
+                ad.setValue(data.getValue())
+
+            self.handleActuatorCommandMessage(ad)
+
+        # Trigger humidifier actuation based on humidity change
+        if (
+            self.handleHumidityChangeOnDevice
+            and data.getTypeID() == ConfigConst.HUMIDITY_SENSOR_TYPE
+        ):
+            logging.info(
+                "Handle humidity change: %s - type ID: %s",
+                str(self.handleHumidityChangeOnDevice),
+                str(data.getTypeID()),
+            )
+
+            ad = ActuatorData(typeID=ConfigConst.HUMIDIFIER_ACTUATOR_TYPE)
+
+            if data.getValue() > self.triggerHumidifierCeiling:
+                ad.setCommand(ConfigConst.COMMAND_ON)
+                ad.setValue(self.triggerHumidifierCeiling)
+            elif data.getValue() < self.triggerHumidifierFloor:
+                ad.setCommand(ConfigConst.COMMAND_ON)
+                ad.setValue(self.triggerHumidifierFloor)
+            else:
+                ad.setCommand(ConfigConst.COMMAND_OFF)
+                ad.setValue(data.getValue())
 
             self.handleActuatorCommandMessage(ad)
 
