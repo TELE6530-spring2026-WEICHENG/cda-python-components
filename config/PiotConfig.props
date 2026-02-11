@@ -67,6 +67,10 @@ handleTempChangeOnDevice = True
 triggerHvacTempFloor     = 18.0
 triggerHvacTempCeiling   = 20.0
 
+handleHumidityChangeOnDevice = True
+triggerHumidifierFloor       = 30.0
+triggerHumidifierCeiling     = 50.0
+
 # camera settings
 streamHostAddr      = 127.0.0.1
 streamHostLabel     = localhost

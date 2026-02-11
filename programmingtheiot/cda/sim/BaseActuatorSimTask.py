@@ -87,13 +87,13 @@ class BaseActuatorSimTask:
                 and curState == self.lastKnownState
             ):
                 logging.debug(
-                    "New actuator command, value and state are repeats. Ignoring: %s %s",
+                    "New actuator command, value and state are repeats. Ignoring: Current command: %s, Current value: %s",
                     str(curCommand),
                     str(curVal),
                 )
             else:
                 logging.debug(
-                    "New actuator command and value to be applied: command: %s value: %s state: %s",
+                    "New actuator command and value to be applied: %s %s",
                     str(curCommand),
                     str(curVal),
                     str(curState),
