@@ -93,7 +93,7 @@ class BaseActuatorSimTask:
                 )
             else:
                 logging.debug(
-                    "New actuator command and value to be applied: %s %s",
+                    "New actuator command and value to be applied: %s %s %s",
                     str(curCommand),
                     str(curVal),
                     str(curState),
