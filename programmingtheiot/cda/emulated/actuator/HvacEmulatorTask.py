@@ -45,6 +45,8 @@ class HvacEmulatorTask(BaseActuatorSimTask):
         self, val: float = ConfigConst.DEFAULT_VAL, stateData: str = None
     ) -> int:
         if self.senseHATEmulator.screen:
+            duty = max(0.0, min(100.0, float(val)))
+            logging.info("[HVAC] ON duty=%.1f state=%s", duty, stateData)
             msg = self.getSimpleName() + "ON:" + str(val) + "C"
             self.senseHATEmulator.screen.scroll_text(msg)
             return 0
@@ -56,6 +58,7 @@ class HvacEmulatorTask(BaseActuatorSimTask):
         self, val: float = ConfigConst.DEFAULT_VAL, stateData: str = None
     ) -> int:
         if self.senseHATEmulator.screen:
+            logging.info("[HVAC] OFF state=%s", stateData)
             msg = self.getSimpleName() + "OFF"
             self.senseHATEmulator.screen.scroll_text(msg)
 
