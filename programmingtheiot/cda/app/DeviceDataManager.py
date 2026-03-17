@@ -54,6 +54,11 @@ class DeviceDataManager(IDataMessageListener):
             section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.ENABLE_SENSING_KEY
         )
 
+        self.enableMqttClient = self.configUtil.getBoolean(
+            section=ConfigConst.CONSTRAINED_DEVICE,
+            key=ConfigConst.ENABLE_MQTT_CLIENT_KEY,
+        )
+
         # Get temperature change handling settings
         self.handleTempChangeOnDevice = self.configUtil.getBoolean(
             ConfigConst.CONSTRAINED_DEVICE, ConfigConst.HANDLE_TEMP_CHANGE_ON_DEVICE_KEY
@@ -106,6 +111,11 @@ class DeviceDataManager(IDataMessageListener):
         if self.enableActuation:
             self.actuatorAdapterMgr = ActuatorAdapterManager(dataMsgListener=self)
             logging.info("Local actuation capabilities enabled")
+
+        # Initialize MQTT client connection if enabled
+        if self.enableMqttClient:
+            self.mqttClient = MqttClientConnector()
+            logging.info("MQTT client connection enabled")
 
     def getLatestActuatorDataResponseFromCache(self, name: str = None) -> ActuatorData:
         """
@@ -247,6 +257,14 @@ class DeviceDataManager(IDataMessageListener):
         if self.sensorAdapterMgr:
             self.sensorAdapterMgr.startManager()
 
+        if self.mqttClient:
+            self.mqttClient.connectClient()
+            self.mqttClient.subscribeToTopic(
+                ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE,
+                callback=None,
+                qos=ConfigConst.DEFAULT_QOS,
+            )
+
         logging.info("Started DeviceDataManager.")
 
     def stopManager(self):
@@ -257,6 +275,12 @@ class DeviceDataManager(IDataMessageListener):
 
         if self.sensorAdapterMgr:
             self.sensorAdapterMgr.stopManager()
+
+        if self.mqttClient:
+            self.mqttClient.unsubscribeFromTopic(
+                ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE
+            )
+            self.mqttClient.disconnectClient()
 
         logging.info("Stopped DeviceDataManager.")
 
