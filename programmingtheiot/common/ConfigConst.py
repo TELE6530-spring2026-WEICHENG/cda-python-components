@@ -33,6 +33,7 @@ DEFAULT_STATUS           = 0
 DEFAULT_TIMEOUT          = 5
 DEFAULT_TTL              = 300
 DEFAULT_QOS              = 0
+DEFAULT_CLEAN_SESSION    = True
 
 # for purposes of this library, float precision is more then sufficient
 DEFAULT_LAT = DEFAULT_VAL
@@ -256,6 +257,7 @@ USE_WEB_ACCESS_KEY   = 'useWebAccess'
 POLL_CYCLES_KEY      = 'pollCycleSecs'
 KEEP_ALIVE_KEY       = 'keepAlive'
 DEFAULT_QOS_KEY      = 'defaultQos'
+CLEAN_SESSION_KEY    = 'cleanSession'
 
 ENABLE_MQTT_CLIENT_KEY = 'enableMqttClient'
 ENABLE_COAP_CLIENT_KEY = 'enableCoapClient'
