@@ -23,8 +23,8 @@ class SystemPerformanceData(BaseIotData):
 	"""
 	DEFAULT_VAL = 0.0
 	
-	def __init__(self, d = None):
-		super(SystemPerformanceData, self).__init__(name = ConfigConst.SYSTEM_PERF_MSG, typeID = ConfigConst.SYSTEM_PERF_TYPE, d = d)
+	def __init__(self, typeID: int = ConfigConst.SYSTEM_PERF_TYPE, name = ConfigConst.SYSTEM_PERF_MSG, d = None):
+		super(SystemPerformanceData, self).__init__(name = name, typeID = typeID, d = d)
 		self.cpuUtilization = ConfigConst.DEFAULT_VAL
 		self.diskUtilization = ConfigConst.DEFAULT_VAL
 		self.memoryUtilization = ConfigConst.DEFAULT_VAL
