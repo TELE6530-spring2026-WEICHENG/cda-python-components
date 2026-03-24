@@ -34,6 +34,9 @@ from programmingtheiot.data.DataUtil import DataUtil
 from programmingtheiot.data.ActuatorData import ActuatorData
 from programmingtheiot.data.SensorData import SensorData
 from programmingtheiot.data.SystemPerformanceData import SystemPerformanceData
+from programmingtheiot.cda.connection.AsyncCoapClientConnector import (
+    AsyncCoapClientConnector,
+)
 
 
 class DeviceDataManager(IDataMessageListener):
@@ -57,6 +60,11 @@ class DeviceDataManager(IDataMessageListener):
         self.enableMqttClient = self.configUtil.getBoolean(
             section=ConfigConst.CONSTRAINED_DEVICE,
             key=ConfigConst.ENABLE_MQTT_CLIENT_KEY,
+        )
+
+        self.enableCoapClient = self.configUtil.getBoolean(
+            section=ConfigConst.CONSTRAINED_DEVICE,
+            key=ConfigConst.ENABLE_COAP_CLIENT_KEY,
         )
 
         # Get temperature change handling settings
@@ -97,7 +105,10 @@ class DeviceDataManager(IDataMessageListener):
         self.coapClient = None
         self.coapServer = None
 
-        # Configure 3 managers with listener(this class)
+        self.init_services()
+
+    def init_services(self):
+        # Configure managers and services with listener (this class)
         if self.enableSystemPerf:
             self.sysPerfMgr = SystemPerformanceManager()
             self.sysPerfMgr.setDataMessageListener(self)
@@ -116,6 +127,11 @@ class DeviceDataManager(IDataMessageListener):
         if self.enableMqttClient:
             self.mqttClient = MqttClientConnector()
             logging.info("MQTT client connection enabled")
+
+        # Initialize CoAP client connection if enabled
+        if self.enableCoapClient:
+            self.coapClient = AsyncCoapClientConnector(self)
+            logging.info("CoAP client connection enabled")
 
     def getLatestActuatorDataResponseFromCache(self, name: str = None) -> ActuatorData:
         """
@@ -204,8 +220,18 @@ class DeviceDataManager(IDataMessageListener):
         @param data The incoming JSON message that matches ActuatorData instance structure.
         @return boolean
         """
-
         logging.info("Incoming message received (from connection): " + str(msg))
+
+        if resourceEnum == ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE:
+            try:
+                ad = DataUtil().jsonToActuatorData(msg)
+                return self.handleActuatorCommandMessage(ad)
+            except Exception as e:
+                logging.warning(
+                    "Failed to convert incoming message to ActuatorData: %s", e
+                )
+                return False
+
         return True
 
     def handleSensorMessage(self, data: SensorData) -> bool:
@@ -358,4 +384,10 @@ class DeviceDataManager(IDataMessageListener):
         1) Check connection: Is there a client connection configured (and valid) to a remote MQTT or CoAP server?
         2) Act on msg: If # 1 is true, send message upstream using one (or both) client connections.
         """
-        pass
+        if self.enableMqttClient and self.mqttClient:
+            self.mqttClient.publishMessage(resource=resourceName, msg=msg)
+
+        if self.enableCoapClient and self.coapClient:
+            self.coapClient.sendPutRequest(
+                resource=resourceName, payload=msg, enableCON=True
+            )
