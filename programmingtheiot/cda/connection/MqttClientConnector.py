@@ -11,6 +11,7 @@
 #
 
 import logging
+import ssl
 import paho.mqtt.client as mqttClient
 
 import programmingtheiot.common.ConfigConst as ConfigConst
@@ -20,6 +21,7 @@ from programmingtheiot.common.IDataMessageListener import IDataMessageListener
 from programmingtheiot.common.ResourceNameEnum import ResourceNameEnum
 
 from programmingtheiot.cda.connection.IPubSubClient import IPubSubClient
+from programmingtheiot.data.DataUtil import DataUtil
 
 
 class MqttClientConnector(IPubSubClient):
@@ -69,6 +71,19 @@ class MqttClientConnector(IPubSubClient):
             ConfigConst.DEFAULT_QOS,
         )
 
+        # TLS settings
+        self.enableEncryption = self.config.getBoolean(
+            ConfigConst.MQTT_GATEWAY_SERVICE,
+            ConfigConst.ENABLE_CRYPT_KEY,
+            False
+        )
+
+        self.pemFileName = self.config.getProperty(
+            ConfigConst.MQTT_GATEWAY_SERVICE,
+            ConfigConst.CERT_FILE_KEY,
+            None
+        )
+
         defaultCleanSession = self.config.getBoolean(
             ConfigConst.MQTT_GATEWAY_SERVICE,
             ConfigConst.CLEAN_SESSION_KEY,
@@ -106,6 +121,28 @@ class MqttClientConnector(IPubSubClient):
         if not self.mqttClient.is_connected():
             logging.info("MQTT client connecting to broker at host: " + self.host)
 
+            # TLS configuration
+            if self.enableEncryption:
+                logging.info("TLS encryption enabled. Loading PEM file: " + str(self.pemFileName))
+                securePort = self.config.getInteger(
+                    ConfigConst.MQTT_GATEWAY_SERVICE,
+                    ConfigConst.SECURE_PORT_KEY,
+                    ConfigConst.DEFAULT_MQTT_SECURE_PORT
+                )
+                try:
+                    self.mqttClient.tls_set(
+                        ca_certs=self.pemFileName,
+                        certfile=None,
+                        keyfile=None,
+                        cert_reqs=ssl.CERT_REQUIRED,
+                        tls_version=ssl.PROTOCOL_TLS
+                    )
+                    self.mqttClient.tls_insecure_set(False)
+                    self.port = securePort
+                    logging.info("TLS configured. Using secure port: " + str(self.port))
+                except Exception as e:
+                    logging.warning("Failed to configure TLS: " + str(e))
+
             # TCP connection -> 4 time handshake
             self.mqttClient.connect(self.host, self.port, self.keepAlive)
             # Start the network loop in a separate thread to handle incoming and outgoing MQTT messages.
@@ -137,6 +174,21 @@ class MqttClientConnector(IPubSubClient):
     def onConnect(self, client, userdata, flags, rc):
         logging.info("MQTT client connected to broker: " + str(client))
 
+        if rc == 0:
+            self.subscribeToTopic(
+                resource=ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE,
+                qos=self.defaultQos
+            )
+            # Route messages on this specific topic directly to onActuatorCommandMessage(),
+            # bypassing the generic onMessage() callback
+            self.mqttClient.message_callback_add(
+                ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE.value,
+                self.onActuatorCommandMessage
+            )
+            logging.info("Subscribed to ActuatorData CMD topic with dedicated callback.")
+        else:
+            logging.warning("MQTT connection failed with code: " + str(rc))
+
     def onDisconnect(self, client, userdata, rc):
         logging.info("MQTT client disconnected from broker: " + str(client))
 
@@ -157,19 +209,19 @@ class MqttClientConnector(IPubSubClient):
         logging.info("MQTT client subscribed: " + str(client))
 
     def onActuatorCommandMessage(self, client, userdata, msg):
-        """
-        This callback is defined as a convenience, but does not
-        need to be used and can be ignored.
+        logging.info("Actuator command message received on topic: " + msg.topic)
 
-        It's simply an example for how you can create your own
-        custom callback for incoming messages from a specific
-        topic subscription (such as for actuator commands).
-
-        @param client The client reference context.
-        @param userdata The user reference context.
-        @param msg The message context, including the embedded payload.
-        """
-        pass
+        if msg.payload:
+            try:
+                actuatorData = DataUtil().jsonToActuatorData(
+                    msg.payload.decode('utf-8')
+                )
+                if self.dataMsgListener:
+                    self.dataMsgListener.handleActuatorCommandMessage(actuatorData)
+            except Exception as e:
+                logging.warning("Failed to decode ActuatorData: " + str(e))
+        else:
+            logging.warning("Received empty ActuatorData message. Ignoring.")
 
     def publishMessage(
         self,
@@ -194,18 +246,9 @@ class MqttClientConnector(IPubSubClient):
         if qos < 0 or qos > 2:
             qos = ConfigConst.DEFAULT_QOS
 
-        # publish message, and wait for publish to complete before returning
-
-        # publish() is asynchronous,sending the publish request to background thread that handles network communication.
         msgInfo = self.mqttClient.publish(topic=resource.value, payload=msg, qos=qos)
 
-        # Making sure the publish request is completed before returning from this method.
-        try:
-            # Handling potential timeout error
-            msgInfo.wait_for_publish()
-        except Exception as e:
-            logging.warning(f"Publish did not complete: {e}")
-            return False
+        # wait_for_publish() removed to prevent deadlock in bidirectional MQTT communication
 
         return True
 

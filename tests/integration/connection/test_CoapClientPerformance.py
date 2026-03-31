@@ -13,7 +13,7 @@ import unittest
 
 from time import sleep
 
-from programmingtheiot.cda.connection.CoapClientConnector import CoapClientConnector
+from programmingtheiot.cda.connection.AsyncCoapClientConnector import AsyncCoapClientConnector
 
 from programmingtheiot.common.ResourceNameEnum import ResourceNameEnum
 
@@ -33,13 +33,13 @@ class CoapClientPerformanceTest(unittest.TestCase):
 	
 	@classmethod
 	def setUpClass(self):
-		logging.disable(level = logging.WARNING)
+		logging.disable(level = logging.CRITICAL)
 		
 	def setUp(self):
-		self.coapClient = CoapClientConnector()
+		self.coapClient = AsyncCoapClientConnector()
 
 	def tearDown(self):
-		self.coapClient.disconnectClient()
+		pass
 					
 	@unittest.skip("Ignore for now.")
 	def testGetRequestCon(self):
@@ -59,22 +59,20 @@ class CoapClientPerformanceTest(unittest.TestCase):
 		
 		self._execTestGet(self.MAX_TEST_RUNS, False)
 
-	@unittest.skip("Ignore for now.")
 	def testPostRequestCon(self):
 		"""
 		Comment the annotation to perf test CON POST
 		"""
 		print("Testing POST - CON")
-		
+
 		self._execTestPost(self.MAX_TEST_RUNS, True)
 
-	@unittest.skip("Ignore for now.")
 	def testPostRequestNon(self):
 		"""
 		Comment the annotation to perf test NON POST
 		"""
 		print("Testing POST - NON")
-		
+
 		self._execTestPost(self.MAX_TEST_RUNS, False)
 
 	@unittest.skip("Ignore for now.")
