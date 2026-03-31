@@ -95,6 +95,7 @@ class DeviceDataManager(IDataMessageListener):
         )
 
         self.enableActuation = ConfigConst.DEFAULT_ENABLE_ACTUATION
+        self.actuatorResponseCache = {}
 
         self.sysPerfMgr = None
         self.sensorAdapterMgr = None
@@ -247,7 +248,15 @@ class DeviceDataManager(IDataMessageListener):
             logging.debug(
                 "Incoming sensor data received (from sensor manager): " + str(data)
             )
-            self._handleSensorDataAnalysis(data=data)
+            # Analyze incoming sensor data and take action by local rules
+            # self._handleSensorDataAnalysis(data=data)
+
+            # Send sensor data upstream to GDA
+            sensorMsg = DataUtil().sensorDataToJson(data)
+            self._handleUpstreamTransmission(
+                resource=ResourceNameEnum.CDA_SENSOR_MSG_RESOURCE, msg=sensorMsg
+            )
+
             return True
         else:
             logging.warning("Incoming sensor data is invalid (null). Ignoring.")
@@ -262,7 +271,20 @@ class DeviceDataManager(IDataMessageListener):
         @param data The incoming SystemPerformanceData message.
         @return boolean
         """
-        pass
+        if data and isinstance(data, SystemPerformanceData):
+            logging.debug("Incoming system performance data received: " + str(data))
+
+            sysPerfMsg = DataUtil().systemPerformanceDataToJson(data)
+            self._handleUpstreamTransmission(
+                resource=ResourceNameEnum.CDA_SYSTEM_PERF_MSG_RESOURCE, msg=sysPerfMsg
+            )
+
+            return True
+        else:
+            logging.warning(
+                "Incoming system performance data is invalid (null). Ignoring."
+            )
+            return False
 
     def setSystemPerformanceDataListener(
         self, listener: ISystemPerformanceDataListener = None
@@ -284,12 +306,8 @@ class DeviceDataManager(IDataMessageListener):
             self.sensorAdapterMgr.startManager()
 
         if self.mqttClient:
+            self.mqttClient.setDataMessageListener(self)
             self.mqttClient.connectClient()
-            self.mqttClient.subscribeToTopic(
-                ResourceNameEnum.CDA_ACTUATOR_CMD_RESOURCE,
-                callback=None,
-                qos=ConfigConst.DEFAULT_QOS,
-            )
 
         logging.info("Started DeviceDataManager.")
 
@@ -377,7 +395,7 @@ class DeviceDataManager(IDataMessageListener):
 
             self.handleActuatorCommandMessage(ad)
 
-    def _handleUpstreamTransmission(self, resourceName: ResourceNameEnum, msg: str):
+    def _handleUpstreamTransmission(self, resource: ResourceNameEnum, msg: str):
         """
         Call this from handleActuatorCommandResponse(), handlesensorMessage(), and handleSystemPerformanceMessage()
         to determine if the message should be sent upstream. Steps to take:
@@ -385,9 +403,11 @@ class DeviceDataManager(IDataMessageListener):
         2) Act on msg: If # 1 is true, send message upstream using one (or both) client connections.
         """
         if self.enableMqttClient and self.mqttClient:
-            self.mqttClient.publishMessage(resource=resourceName, msg=msg)
+            logging.debug("Sending upstream via MQTT: " + str(resource.value))
+            self.mqttClient.publishMessage(resource=resource, msg=msg)
 
         if self.enableCoapClient and self.coapClient:
+            logging.debug("Sending upstream via CoAP: " + str(resource.value))
             self.coapClient.sendPutRequest(
-                resource=resourceName, payload=msg, enableCON=True
+                resource=resource, payload=msg, enableCON=True
             )

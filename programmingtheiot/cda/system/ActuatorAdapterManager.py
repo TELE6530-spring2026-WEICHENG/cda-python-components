@@ -97,9 +97,8 @@ class ActuatorAdapterManager(object):
                         data.getTypeID(),
                     )
 
-                # TODO: in a later lab module, the responseData instance will be
-                # passed to a callback function implemented in DeviceDataManager
-                # via IDataMessageListener
+                if responseData and self.dataMsgListener:
+                    self.dataMsgListener.handleActuatorCommandResponse(responseData)
 
                 return responseData
             else:

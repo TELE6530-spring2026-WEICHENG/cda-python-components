@@ -96,7 +96,7 @@ class MqttClientConnectorTest(unittest.TestCase):
 
         self.mcc.disconnectClient()
 
-    @unittest.skip("Ignore for now.")
+    # @unittest.skip("Ignore for now.")
     def testNewActuatorCmdPubSub(self):
         qos = 1
 

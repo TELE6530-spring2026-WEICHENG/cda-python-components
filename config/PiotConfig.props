@@ -16,11 +16,11 @@ certFile       = ./cert/PiotMqttLocalCertFile.pem
 host           = localhost
 port           = 1883
 securePort     = 8883
-defaultQoS     = 0
+defaultQoS     = 1
 keepAlive      = 60
 cleanSession   = True
 enableAuth     = False
-enableCrypt    = False
+enableCrypt    = True
 
 #
 # CoAP client configuration information
@@ -32,7 +32,7 @@ host           = localhost
 port           = 5683
 securePort     = 5684
 enableAuth     = False
-enableCrypt    = False
+enableCrypt    = True
 
 #
 # CDA specific configuration information
@@ -40,15 +40,15 @@ enableCrypt    = False
 [ConstrainedDevice]
 deviceLocationID = constraineddevicetest
 enableSimulator  = False
-enableEmulator   = False
+enableEmulator   = True
 enableSenseHAT   = False
-enableMqttClient = False
+enableMqttClient = True
 enableCoapServer = False
-enableCoapClient = True
+enableCoapClient = False
 enableSystemPerformance = True
 enableSensing    = True
 enableLogging    = True
-pollCycleSecs    = 5
+pollCycleSecs    = 30
 testGdaDataPath  = /tmp/gda-data
 testCdaDataPath  = /tmp/cda-data
 testEmptyApp     = False
