@@ -25,9 +25,16 @@ _outputDeviceCache = {}
 
 
 def _getConfigInt(key: str, default: int) -> int:
-    return ConfigUtil().getInteger(
-        section=ConfigConst.CONSTRAINED_DEVICE, key=key, defaultVal=default,
+    raw = ConfigUtil().getProperty(
+        section=ConfigConst.CONSTRAINED_DEVICE, key=key, defaultVal=None,
     )
+    if raw is None or raw == ConfigConst.NOT_SET:
+        return default
+    try:
+        return int(str(raw).strip(), 0)
+    except ValueError:
+        logging.warning("Invalid integer config for %s=%r; using default %s.", key, raw, default)
+        return default
 
 
 def get_i2c_bus():
@@ -59,11 +66,9 @@ def get_ads1115(addr: int = None):
 def get_ads1115_channel(channel: int, addr: int = None):
     """Return an AnalogIn wrapper for the requested single-ended channel."""
     from adafruit_ads1x15.analog_in import AnalogIn
-    from adafruit_ads1x15.ads1115 import P0, P1, P2, P3
-    pinMap = {0: P0, 1: P1, 2: P2, 3: P3}
-    if channel not in pinMap:
+    if channel not in (0, 1, 2, 3):
         raise ValueError("ADS1115 channel must be 0-3, got %s" % channel)
-    return AnalogIn(get_ads1115(addr), pinMap[channel])
+    return AnalogIn(get_ads1115(addr), channel)
 
 
 def get_aht20(addr: int = None):
