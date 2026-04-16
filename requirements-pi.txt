@@ -1,0 +1,8 @@
+# Raspberry Pi-only dependencies for embedded hardware integration.
+# Install on the Pi only:
+#   pip install -r requirements-pi.txt
+adafruit-blinka
+adafruit-circuitpython-ads1x15
+adafruit-circuitpython-ahtx0
+gpiozero
+lgpio

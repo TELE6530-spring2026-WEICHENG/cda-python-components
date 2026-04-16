@@ -122,12 +122,15 @@ RESOURCE_REGISTRATION_REQUEST = 'ResourceRegRequest'
 LED_ACTUATOR_NAME        = 'LedActuator'
 HUMIDIFIER_ACTUATOR_NAME = 'HumidifierActuator'
 HVAC_ACTUATOR_NAME       = 'HvacActuator'
+FAN_ACTUATOR_NAME        = 'FanActuator'
+WATER_PUMP_ACTUATOR_NAME = 'WaterPumpActuator'
 
-HUMIDITY_SENSOR_NAME = 'HumiditySensor'
-PRESSURE_SENSOR_NAME = 'PressureSensor'
-TEMP_SENSOR_NAME     = 'TempSensor'
-SYSTEM_PERF_NAME     = 'SystemPerfMsg'
-CAMERA_SENSOR_NAME   = 'CameraSensor'
+HUMIDITY_SENSOR_NAME      = 'HumiditySensor'
+PRESSURE_SENSOR_NAME      = 'PressureSensor'
+TEMP_SENSOR_NAME          = 'TempSensor'
+SOIL_MOISTURE_SENSOR_NAME = 'SoilMoistureSensor'
+SYSTEM_PERF_NAME          = 'SystemPerfMsg'
+CAMERA_SENSOR_NAME        = 'CameraSensor'
 
 COMMAND_OFF = DEFAULT_COMMAND
 COMMAND_ON  = 1
@@ -140,10 +143,13 @@ DEFAULT_SENSOR_TYPE       = DEFAULT_TYPE_ID
 ENV_DEVICE_TYPE           = 1000
 HVAC_ACTUATOR_TYPE        = 1001
 HUMIDIFIER_ACTUATOR_TYPE  = 1002
+FAN_ACTUATOR_TYPE         = 1003
+WATER_PUMP_ACTUATOR_TYPE  = 1004
 
 HUMIDITY_SENSOR_TYPE      = 1010
 PRESSURE_SENSOR_TYPE      = 1012
 TEMP_SENSOR_TYPE          = 1013
+SOIL_MOISTURE_SENSOR_TYPE = 1014
 
 DISPLAY_DEVICE_TYPE       = 2000
 LED_DISPLAY_ACTUATOR_TYPE = 2001
@@ -249,9 +255,24 @@ CERT_FILE_KEY        = 'certFile'
 CRED_FILE_KEY        = 'credFile'
 ENABLE_AUTH_KEY      = 'enableAuth'
 ENABLE_CRYPT_KEY     = 'enableCrypt'
-ENABLE_SIMULATOR_KEY = 'enableSimulator'
-ENABLE_EMULATOR_KEY  = 'enableEmulator'
-ENABLE_SENSE_HAT_KEY = 'enableSenseHAT'
+ENABLE_SIMULATOR_KEY     = 'enableSimulator'
+ENABLE_EMULATOR_KEY      = 'enableEmulator'
+ENABLE_EMBEDDED_HW_KEY   = 'enableEmbeddedHardware'
+ENABLE_SENSE_HAT_KEY     = 'enableSenseHAT'
+
+# Embedded hardware configuration keys
+I2C_BUS_KEY              = 'i2cBusNumber'
+AHT_I2C_ADDR_KEY         = 'ahtI2cAddress'
+ADS1115_I2C_ADDR_KEY     = 'ads1115I2cAddress'
+
+SOIL_ADC_CHANNEL_KEY     = 'soilMoistureAdcChannel'
+SOIL_DRY_RAW_KEY         = 'soilMoistureDryRaw'
+SOIL_WET_RAW_KEY         = 'soilMoistureWetRaw'
+
+FAN_GPIO_PIN_KEY         = 'fanRelayGpioPin'
+PUMP_GPIO_PIN_KEY        = 'waterPumpRelayGpioPin'
+RELAY_ACTIVE_LOW_KEY     = 'relayActiveLow'
+PUMP_MAX_ON_SECONDS_KEY  = 'waterPumpMaxOnSeconds'
 ENABLE_LOGGING_KEY   = 'enableLogging'
 USE_WEB_ACCESS_KEY   = 'useWebAccess'
 POLL_CYCLES_KEY      = 'pollCycleSecs'
