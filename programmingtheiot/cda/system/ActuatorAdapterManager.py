@@ -46,6 +46,10 @@ class ActuatorAdapterManager(object):
             section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.ENABLE_EMULATOR_KEY
         )
 
+        self.useEmbeddedHw = self.configUtil.getBoolean(
+            section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.ENABLE_EMBEDDED_HW_KEY
+        )
+
         self.deviceID = self.configUtil.getProperty(
             section=ConfigConst.CONSTRAINED_DEVICE,
             key=ConfigConst.DEVICE_LOCATION_ID_KEY,
@@ -62,6 +66,8 @@ class ActuatorAdapterManager(object):
         self.humidifierActuator = None
         self.hvacActuator = None
         self.ledDisplayActuator = None
+        self.fanActuator = None
+        self.waterPumpActuator = None
 
         self._initEnvironmentalActuationTasks()
 
@@ -91,6 +97,13 @@ class ActuatorAdapterManager(object):
                     and self.ledDisplayActuator
                 ):
                     responseData = self.ledDisplayActuator.updateActuator(data)
+                elif aType == ConfigConst.FAN_ACTUATOR_TYPE and self.fanActuator:
+                    responseData = self.fanActuator.updateActuator(data)
+                elif (
+                    aType == ConfigConst.WATER_PUMP_ACTUATOR_TYPE
+                    and self.waterPumpActuator
+                ):
+                    responseData = self.waterPumpActuator.updateActuator(data)
                 else:
                     logging.warning(
                         "No valid actuator type. Ignoring actuation for type: %s",
@@ -123,30 +136,59 @@ class ActuatorAdapterManager(object):
             return False
 
     def _initEnvironmentalActuationTasks(self):
-        if not self.useEmulator:
-            if self.useSimulator:
-                self.humidifierActuator = HumidifierActuatorSimTask()
-                self.hvacActuator = HvacActuatorSimTask()
+        if self.useEmbeddedHw:
+            self._initEmbeddedHardwareActuators()
+        elif self.useEmulator:
+            self._initEmulatorActuators()
         else:
-            hueModule = import_module(
-                "programmingtheiot.cda.emulated.actuator.HumidifierEmulatorTask",
-                "HumidifierEmulatorTask",
-            )
-            hueClazz = getattr(hueModule, "HumidifierEmulatorTask")
-            self.humidifierActuator = hueClazz()
+            self._initSimActuators()
 
-            # create the HVAC actuator emulator
-            hveModule = import_module(
-                "programmingtheiot.cda.emulated.actuator.HvacEmulatorTask",
-                "HvacEmulatorTask",
-            )
-            hveClazz = getattr(hveModule, "HvacEmulatorTask")
-            self.hvacActuator = hveClazz()
+    def _initSimActuators(self):
+        if self.useSimulator:
+            self.humidifierActuator = HumidifierActuatorSimTask()
+            self.hvacActuator = HvacActuatorSimTask()
 
-            # create the LED display actuator emulator
-            leDisplayModule = import_module(
-                "programmingtheiot.cda.emulated.LedDisplayEmulatorTask",
-                "LedDisplayEmulatorTask",
+    def _initEmulatorActuators(self):
+        hueModule = import_module(
+            "programmingtheiot.cda.emulated.actuator.HumidifierEmulatorTask",
+            "HumidifierEmulatorTask",
+        )
+        hueClazz = getattr(hueModule, "HumidifierEmulatorTask")
+        self.humidifierActuator = hueClazz()
+
+        hveModule = import_module(
+            "programmingtheiot.cda.emulated.actuator.HvacEmulatorTask",
+            "HvacEmulatorTask",
+        )
+        hveClazz = getattr(hveModule, "HvacEmulatorTask")
+        self.hvacActuator = hveClazz()
+
+        leDisplayModule = import_module(
+            "programmingtheiot.cda.emulated.LedDisplayEmulatorTask",
+            "LedDisplayEmulatorTask",
+        )
+        leClazz = getattr(leDisplayModule, "LedDisplayEmulatorTask")
+        self.ledDisplayActuator = leClazz()
+
+    def _initEmbeddedHardwareActuators(self):
+        try:
+            from programmingtheiot.cda.embedded.FanRelayActuatorAdapterTask import (
+                FanRelayActuatorAdapterTask,
             )
-            leClazz = getattr(leDisplayModule, "LedDisplayEmulatorTask")
-            self.ledDisplayActuator = leClazz()
+            self.fanActuator = FanRelayActuatorAdapterTask()
+        except Exception:
+            logging.exception("Failed to init fan relay actuator.")
+            self.fanActuator = None
+
+        try:
+            from programmingtheiot.cda.embedded.WaterPumpRelayActuatorAdapterTask import (
+                WaterPumpRelayActuatorAdapterTask,
+            )
+            self.waterPumpActuator = WaterPumpRelayActuatorAdapterTask()
+        except Exception:
+            logging.exception("Failed to init water pump relay actuator.")
+            self.waterPumpActuator = None
+
+        # HVAC / humidifier / LED are sim-only fallbacks on this board
+        self.humidifierActuator = HumidifierActuatorSimTask()
+        self.hvacActuator = HvacActuatorSimTask()

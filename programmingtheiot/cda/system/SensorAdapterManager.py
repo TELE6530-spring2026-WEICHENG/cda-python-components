@@ -51,6 +51,10 @@ class SensorAdapterManager(object):
             section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.ENABLE_EMULATOR_KEY
         )
 
+        self.useEmbeddedHw = self.configUtil.getBoolean(
+            section=ConfigConst.CONSTRAINED_DEVICE, key=ConfigConst.ENABLE_EMBEDDED_HW_KEY
+        )
+
         self.locationID = self.configUtil.getProperty(
             section=ConfigConst.CONSTRAINED_DEVICE,
             key=ConfigConst.DEVICE_LOCATION_ID_KEY,
@@ -79,26 +83,38 @@ class SensorAdapterManager(object):
         self.humidityAdapter = None
         self.pressureAdapter = None
         self.tempAdapter = None
+        self.soilMoistureAdapter = None
 
         self._initEnvironmentalSensorTasks()
 
     def handleTelemetry(self):
-        humidityData = self.humidityAdapter.generateTelemetry()
-        pressureData = self.pressureAdapter.generateTelemetry()
-        tempData = self.tempAdapter.generateTelemetry()
+        if self.humidityAdapter:
+            humidityData = self.humidityAdapter.generateTelemetry()
+            humidityData.setLocationID(self.locationID)
+            logging.debug("Generated humidity data: " + str(humidityData))
+            if self.dataMsgListener:
+                self.dataMsgListener.handleSensorMessage(humidityData)
 
-        humidityData.setLocationID(self.locationID)
-        pressureData.setLocationID(self.locationID)
-        tempData.setLocationID(self.locationID)
+        if self.pressureAdapter:
+            pressureData = self.pressureAdapter.generateTelemetry()
+            pressureData.setLocationID(self.locationID)
+            logging.debug("Generated pressure data: " + str(pressureData))
+            if self.dataMsgListener:
+                self.dataMsgListener.handleSensorMessage(pressureData)
 
-        logging.debug("Generated humidity data: " + str(humidityData))
-        logging.debug("Generated pressure data: " + str(pressureData))
-        logging.debug("Generated temp data: " + str(tempData))
+        if self.tempAdapter:
+            tempData = self.tempAdapter.generateTelemetry()
+            tempData.setLocationID(self.locationID)
+            logging.debug("Generated temp data: " + str(tempData))
+            if self.dataMsgListener:
+                self.dataMsgListener.handleSensorMessage(tempData)
 
-        if self.dataMsgListener:
-            self.dataMsgListener.handleSensorMessage(humidityData)
-            self.dataMsgListener.handleSensorMessage(pressureData)
-            self.dataMsgListener.handleSensorMessage(tempData)
+        if self.soilMoistureAdapter:
+            soilData = self.soilMoistureAdapter.generateTelemetry()
+            soilData.setLocationID(self.locationID)
+            logging.debug("Generated soil moisture data: " + str(soilData))
+            if self.dataMsgListener:
+                self.dataMsgListener.handleSensorMessage(soilData)
 
     def setDataMessageListener(self, listener: IDataMessageListener) -> bool:
         if listener and isinstance(listener, IDataMessageListener):
@@ -127,6 +143,14 @@ class SensorAdapterManager(object):
             return False
 
     def _initEnvironmentalSensorTasks(self):
+        if self.useEmbeddedHw:
+            self._initEmbeddedHardwareSensors()
+        elif self.useEmulator:
+            self._initEmulatorSensors()
+        else:
+            self._initSimSensors()
+
+    def _initSimSensors(self):
         humidityFloor = self.configUtil.getFloat(
             section=ConfigConst.CONSTRAINED_DEVICE,
             key=ConfigConst.HUMIDITY_SIM_FLOOR_KEY,
@@ -160,47 +184,75 @@ class SensorAdapterManager(object):
             defaultVal=SensorDataGenerator.HI_NORMAL_INDOOR_TEMP,
         )
 
-        ### Generate data sets
-        if not self.useEmulator:
-            self.dataGenerator = SensorDataGenerator()
+        self.dataGenerator = SensorDataGenerator()
 
-            humidityData = self.dataGenerator.generateDailyEnvironmentHumidityDataSet(
-                minValue=humidityFloor,
-                maxValue=humidityCeiling,
-                useSeconds=False,
-            )
-            pressureData = self.dataGenerator.generateDailyEnvironmentPressureDataSet(
-                minValue=pressureFloor,
-                maxValue=pressureCeiling,
-                useSeconds=False,
-            )
-            tempData = self.dataGenerator.generateDailyIndoorTemperatureDataSet(
-                minValue=tempFloor, maxValue=tempCeiling, useSeconds=False
-            )
+        humidityData = self.dataGenerator.generateDailyEnvironmentHumidityDataSet(
+            minValue=humidityFloor,
+            maxValue=humidityCeiling,
+            useSeconds=False,
+        )
+        pressureData = self.dataGenerator.generateDailyEnvironmentPressureDataSet(
+            minValue=pressureFloor,
+            maxValue=pressureCeiling,
+            useSeconds=False,
+        )
+        tempData = self.dataGenerator.generateDailyIndoorTemperatureDataSet(
+            minValue=tempFloor, maxValue=tempCeiling, useSeconds=False
+        )
 
-            ### Create sensor task objects with data sets
-            self.humidityAdapter = HumiditySensorSimTask(dataSet=humidityData)
-            self.pressureAdapter = PressureSensorSimTask(dataSet=pressureData)
-            self.tempAdapter = TemperatureSensorSimTask(dataSet=tempData)
+        self.humidityAdapter = HumiditySensorSimTask(dataSet=humidityData)
+        self.pressureAdapter = PressureSensorSimTask(dataSet=pressureData)
+        self.tempAdapter = TemperatureSensorSimTask(dataSet=tempData)
 
-        else:
-            heModule = import_module(
-                "programmingtheiot.cda.emulated.sensor.HumiditySensorEmulatorTask",
-                "HumiditySensorEmulatorTask",
-            )
-            heClazz = getattr(heModule, "HumiditySensorEmulatorTask")
-            self.humidityAdapter = heClazz()
+    def _initEmulatorSensors(self):
+        heModule = import_module(
+            "programmingtheiot.cda.emulated.sensor.HumiditySensorEmulatorTask",
+            "HumiditySensorEmulatorTask",
+        )
+        heClazz = getattr(heModule, "HumiditySensorEmulatorTask")
+        self.humidityAdapter = heClazz()
 
-            peModule = import_module(
-                "programmingtheiot.cda.emulated.sensor.PressureSensorEmulatorTask",
-                "PressureSensorEmulatorTask",
-            )
-            peClazz = getattr(peModule, "PressureSensorEmulatorTask")
-            self.pressureAdapter = peClazz()
+        peModule = import_module(
+            "programmingtheiot.cda.emulated.sensor.PressureSensorEmulatorTask",
+            "PressureSensorEmulatorTask",
+        )
+        peClazz = getattr(peModule, "PressureSensorEmulatorTask")
+        self.pressureAdapter = peClazz()
 
-            teModule = import_module(
-                "programmingtheiot.cda.emulated.sensor.TemperatureSensorEmulatorTask",
-                "TemperatureSensorEmulatorTask",
+        teModule = import_module(
+            "programmingtheiot.cda.emulated.sensor.TemperatureSensorEmulatorTask",
+            "TemperatureSensorEmulatorTask",
+        )
+        teClazz = getattr(teModule, "TemperatureSensorEmulatorTask")
+        self.tempAdapter = teClazz()
+
+    def _initEmbeddedHardwareSensors(self):
+        try:
+            from programmingtheiot.cda.embedded.HumidityI2cSensorAdapterTask import (
+                HumidityI2cSensorAdapterTask,
             )
-            teClazz = getattr(teModule, "TemperatureSensorEmulatorTask")
-            self.tempAdapter = teClazz()
+            self.humidityAdapter = HumidityI2cSensorAdapterTask()
+        except Exception:
+            logging.exception("Failed to init embedded humidity adapter.")
+            self.humidityAdapter = None
+
+        try:
+            from programmingtheiot.cda.embedded.TemperatureI2cSensorAdapterTask import (
+                TemperatureI2cSensorAdapterTask,
+            )
+            self.tempAdapter = TemperatureI2cSensorAdapterTask()
+        except Exception:
+            logging.exception("Failed to init embedded temperature adapter.")
+            self.tempAdapter = None
+
+        try:
+            from programmingtheiot.cda.embedded.SoilMoistureI2cSensorAdapterTask import (
+                SoilMoistureI2cSensorAdapterTask,
+            )
+            self.soilMoistureAdapter = SoilMoistureI2cSensorAdapterTask()
+        except Exception:
+            logging.exception("Failed to init embedded soil moisture adapter.")
+            self.soilMoistureAdapter = None
+
+        # Pressure sensor is not wired on this board.
+        self.pressureAdapter = None
