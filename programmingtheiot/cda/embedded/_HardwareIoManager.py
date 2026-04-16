@@ -16,7 +16,7 @@ import programmingtheiot.common.ConfigConst as ConfigConst
 from programmingtheiot.common.ConfigUtil import ConfigUtil
 
 
-_lock = threading.Lock()
+_lock = threading.RLock()
 
 _i2cBus = None
 _ads1115Cache = {}
