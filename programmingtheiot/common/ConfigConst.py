@@ -273,6 +273,11 @@ FAN_GPIO_PIN_KEY         = 'fanRelayGpioPin'
 PUMP_GPIO_PIN_KEY        = 'waterPumpRelayGpioPin'
 RELAY_ACTIVE_LOW_KEY     = 'relayActiveLow'
 PUMP_MAX_ON_SECONDS_KEY  = 'waterPumpMaxOnSeconds'
+
+ENABLE_LED_ACTUATOR_KEY       = 'enableLedActuator'
+LED_GPIO_PIN_KEY              = 'ledGpioPin'
+LED_WATCHDOG_TIMEOUT_SECS_KEY = 'ledWatchdogTimeoutSecs'
+DEFAULT_LED_WATCHDOG_TIMEOUT_SECS = 20
 ENABLE_LOGGING_KEY   = 'enableLogging'
 USE_WEB_ACCESS_KEY   = 'useWebAccess'
 POLL_CYCLES_KEY      = 'pollCycleSecs'

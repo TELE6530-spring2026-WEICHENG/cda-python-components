@@ -38,7 +38,7 @@ enableCrypt    = True
 # CDA specific configuration information
 #
 [ConstrainedDevice]
-deviceLocationID = constraineddevicetest
+deviceLocationID = constraineddevice001
 enableSimulator        = False
 enableEmulator         = False
 enableEmbeddedHardware = True
@@ -49,7 +49,7 @@ enableCoapClient = False
 enableSystemPerformance = True
 enableSensing    = True
 enableLogging    = True
-pollCycleSecs    = 30
+pollCycleSecs    = 10
 testGdaDataPath  = /tmp/gda-data
 testCdaDataPath  = /tmp/cda-data
 testEmptyApp     = False
@@ -86,6 +86,11 @@ fanRelayGpioPin        = 17
 waterPumpRelayGpioPin  = 27
 relayActiveLow         = True
 waterPumpMaxOnSeconds  = 30
+
+# LED liveness probe (GPIO22 — avoids 17=fan, 27=pump, I2C/SPI pins)
+enableLedActuator       = True
+ledGpioPin              = 22
+ledWatchdogTimeoutSecs  = 20
 
 # camera settings
 streamHostAddr      = 127.0.0.1
