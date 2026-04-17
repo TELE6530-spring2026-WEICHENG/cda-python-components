@@ -13,7 +13,7 @@
 [Mqtt.GatewayService]
 credFile       = ./cred/PiotMqttLocalCred.props
 certFile       = ./cert/PiotMqttLocalCertFile.pem
-host           = localhost
+host           = 10.0.0.48
 port           = 1883
 securePort     = 8883
 defaultQoS     = 1
@@ -39,8 +39,9 @@ enableCrypt    = True
 #
 [ConstrainedDevice]
 deviceLocationID = constraineddevicetest
-enableSimulator  = False
-enableEmulator   = True
+enableSimulator        = False
+enableEmulator         = False
+enableEmbeddedHardware = True
 enableSenseHAT   = False
 enableMqttClient = True
 enableCoapServer = False
@@ -71,6 +72,20 @@ triggerHvacTempCeiling   = 20.0
 handleHumidityChangeOnDevice = True
 triggerHumidifierFloor       = 30.0
 triggerHumidifierCeiling     = 50.0
+
+# embedded hardware (Pi 5) — I2C + GPIO wiring
+i2cBusNumber           = 1
+ahtI2cAddress          = 0x38
+ads1115I2cAddress      = 0x48
+
+soilMoistureAdcChannel = 0
+soilMoistureDryRaw     = 17700
+soilMoistureWetRaw     = 7700
+
+fanRelayGpioPin        = 17
+waterPumpRelayGpioPin  = 27
+relayActiveLow         = True
+waterPumpMaxOnSeconds  = 30
 
 # camera settings
 streamHostAddr      = 127.0.0.1

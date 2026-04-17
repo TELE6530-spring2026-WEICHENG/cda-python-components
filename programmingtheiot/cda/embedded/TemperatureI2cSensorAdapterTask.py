@@ -1,31 +1,43 @@
 #####
-# 
-# This class is part of the Programming the Internet of Things
-# project, and is available via the MIT License, which can be
-# found in the LICENSE file at the top level of this repository.
-# 
-# You may find it more helpful to your design to adjust the
-# functionality, constants and interfaces (if there are any)
-# provided within in order to meet the needs of your specific
-# Programming the Internet of Things project.
-# 
+#
+# Reads temperature (Celsius) from an AHT20 sensor on the I2C bus.
+#
 
 import logging
 
+import programmingtheiot.common.ConfigConst as ConfigConst
+
 from programmingtheiot.data.SensorData import SensorData
+from programmingtheiot.cda.embedded import _HardwareIoManager
+
 
 class TemperatureI2cSensorAdapterTask():
-	"""
-	Shell representation of class for student implementation.
-	
-	"""
 
-	def __init__(self):
-		pass
-	
-	def generateTelemetry(self) -> SensorData:
-		pass
-	
-	def getTelemetryValue(self) -> float:
-		pass
-	
+    def __init__(self):
+        self.name = ConfigConst.TEMP_SENSOR_NAME
+        self.typeID = ConfigConst.TEMP_SENSOR_TYPE
+        self._lastValue = ConfigConst.DEFAULT_VAL
+        self._sensor = None
+        try:
+            self._sensor = _HardwareIoManager.get_aht20()
+        except Exception:
+            logging.exception("Failed to initialize AHT20 for temperature task.")
+
+    def generateTelemetry(self) -> SensorData:
+        value = self.getTelemetryValue()
+        data = SensorData(typeID=self.typeID, name=self.name)
+        data.setValue(value)
+        return data
+
+    def getTelemetryValue(self) -> float:
+        if self._sensor is None:
+            try:
+                self._sensor = _HardwareIoManager.get_aht20()
+            except Exception:
+                logging.warning("AHT20 still unavailable; returning cached temperature value.")
+                return self._lastValue
+        try:
+            self._lastValue = float(self._sensor.temperature)
+        except Exception:
+            logging.warning("Failed to read AHT20 temperature; returning cached value.", exc_info=True)
+        return self._lastValue
