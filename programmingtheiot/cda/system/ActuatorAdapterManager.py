@@ -189,6 +189,20 @@ class ActuatorAdapterManager(object):
             logging.exception("Failed to init water pump relay actuator.")
             self.waterPumpActuator = None
 
-        # HVAC / humidifier / LED are sim-only fallbacks on this board
+        enableLed = self.configUtil.getBoolean(
+            section=ConfigConst.CONSTRAINED_DEVICE,
+            key=ConfigConst.ENABLE_LED_ACTUATOR_KEY,
+        )
+        if enableLed:
+            try:
+                from programmingtheiot.cda.embedded.LedActuatorAdapterTask import (
+                    LedActuatorAdapterTask,
+                )
+                self.ledDisplayActuator = LedActuatorAdapterTask()
+            except Exception:
+                logging.exception("Failed to init LED actuator.")
+                self.ledDisplayActuator = None
+
+        # HVAC / humidifier are sim-only fallbacks on this board
         self.humidifierActuator = HumidifierActuatorSimTask()
         self.hvacActuator = HvacActuatorSimTask()
