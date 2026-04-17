@@ -38,7 +38,7 @@ enableCrypt    = True
 # CDA specific configuration information
 #
 [ConstrainedDevice]
-deviceLocationID = constraineddevicetest
+deviceLocationID = constraineddevice001
 enableSimulator        = False
 enableEmulator         = False
 enableEmbeddedHardware = True
