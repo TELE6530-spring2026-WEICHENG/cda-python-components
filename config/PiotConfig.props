@@ -84,7 +84,7 @@ soilMoistureWetRaw     = 7700
 
 fanRelayGpioPin        = 17
 waterPumpRelayGpioPin  = 27
-relayActiveLow         = True
+relayActiveLow         = False
 waterPumpMaxOnSeconds  = 30
 
 # LED liveness probe (GPIO22 — avoids 17=fan, 27=pump, I2C/SPI pins)
