@@ -25,36 +25,36 @@ class SystemPerformanceData(BaseIotData):
 	
 	def __init__(self, typeID: int = ConfigConst.SYSTEM_PERF_TYPE, name = ConfigConst.SYSTEM_PERF_MSG, d = None):
 		super(SystemPerformanceData, self).__init__(name = name, typeID = typeID, d = d)
-		self.cpuUtilization = ConfigConst.DEFAULT_VAL
-		self.diskUtilization = ConfigConst.DEFAULT_VAL
-		self.memoryUtilization = ConfigConst.DEFAULT_VAL
-	
+		self.cpuUtil = ConfigConst.DEFAULT_VAL
+		self.diskUtil = ConfigConst.DEFAULT_VAL
+		self.memUtil = ConfigConst.DEFAULT_VAL
+
 	def getCpuUtilization(self):
-		return self.cpuUtilization
-	
+		return self.cpuUtil
+
 	def getDiskUtilization(self):
-		return self.diskUtilization
-	
+		return self.diskUtil
+
 	def getMemoryUtilization(self):
-		return self.memoryUtilization
-	
+		return self.memUtil
+
 	def setCpuUtilization(self, cpuUtil):
-		self.cpuUtilization = cpuUtil
+		self.cpuUtil = cpuUtil
 		self.updateTimeStamp()
-	
+
 	def setDiskUtilization(self, diskUtil):
-		self.diskUtilization = diskUtil
+		self.diskUtil = diskUtil
 		self.updateTimeStamp()
-	
+
 	def setMemoryUtilization(self, memUtil):
-		self.memoryUtilization = memUtil
+		self.memUtil = memUtil
 		self.updateTimeStamp()
-	
+
 	def _handleUpdateData(self, data):
 		if data and isinstance(data, SystemPerformanceData):
-			self.cpuUtilization = data.getCpuUtilization()
-			self.diskUtilization = data.getDiskUtilization()
-			self.memoryUtilization = data.getMemoryUtilization()
+			self.cpuUtil = data.getCpuUtilization()
+			self.diskUtil = data.getDiskUtilization()
+			self.memUtil = data.getMemoryUtilization()
 		else:
 			self.hasError = True
 			logging.error("Invalid data object passed to SystemPerformanceData _handleUpdateData.")
@@ -63,7 +63,7 @@ class SystemPerformanceData(BaseIotData):
 	def __str__(self):
 		"""
 		Returns a string representation of this instance.
-		
+
 		@return str
 		"""
-		return "SystemPerformanceData [name=%s, typeID=%d, cpuUtilization=%.2f, diskUtilization=%.2f, memoryUtilization=%.2f, timeStamp=%s]" % (self.name, self.typeID, self.cpuUtilization, self.diskUtilization, self.memoryUtilization, self.timeStamp)
+		return "SystemPerformanceData [name=%s, typeID=%d, cpuUtil=%.2f, diskUtil=%.2f, memUtil=%.2f, timeStamp=%s]" % (self.name, self.typeID, self.cpuUtil, self.diskUtil, self.memUtil, self.timeStamp)
