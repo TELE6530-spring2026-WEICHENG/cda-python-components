@@ -135,6 +135,22 @@ class ActuatorAdapterManager(object):
             logging.warning("Invalid data message listener provided.")
             return False
 
+    def wireWaterPumpDeps(self, soilSensor=None, responseCallback=None) -> bool:
+        if not self.waterPumpActuator:
+            logging.debug("Water pump actuator not initialized; skipping wireWaterPumpDeps.")
+            return False
+        if soilSensor is not None and hasattr(self.waterPumpActuator, "setSoilSensor"):
+            self.waterPumpActuator.setSoilSensor(soilSensor)
+        if responseCallback is not None and hasattr(
+            self.waterPumpActuator, "setResponseCallback"
+        ):
+            self.waterPumpActuator.setResponseCallback(responseCallback)
+        logging.info(
+            "Wired water pump deps (soilSensor=%s, responseCallback=%s).",
+            soilSensor is not None, responseCallback is not None,
+        )
+        return True
+
     def _initEnvironmentalActuationTasks(self):
         if self.useEmbeddedHw:
             self._initEmbeddedHardwareActuators()

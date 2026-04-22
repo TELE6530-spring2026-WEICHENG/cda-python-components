@@ -124,6 +124,19 @@ class DeviceDataManager(IDataMessageListener):
             self.actuatorAdapterMgr = ActuatorAdapterManager(dataMsgListener=self)
             logging.info("Local actuation capabilities enabled")
 
+        # Wire water-pump dependencies: the CDA-autonomous irrigation loop needs a
+        # live soil-moisture reading and its own async response path back to MQTT.
+        if self.actuatorAdapterMgr and self.sensorAdapterMgr and hasattr(
+            self.actuatorAdapterMgr, "wireWaterPumpDeps"
+        ):
+            soilSensor = None
+            if hasattr(self.sensorAdapterMgr, "getSoilMoistureAdapter"):
+                soilSensor = self.sensorAdapterMgr.getSoilMoistureAdapter()
+            self.actuatorAdapterMgr.wireWaterPumpDeps(
+                soilSensor=soilSensor,
+                responseCallback=self.handleActuatorCommandResponse,
+            )
+
         # Initialize MQTT client connection if enabled
         if self.enableMqttClient:
             self.mqttClient = MqttClientConnector()

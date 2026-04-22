@@ -122,6 +122,9 @@ class SensorAdapterManager(object):
             return True
         return False
 
+    def getSoilMoistureAdapter(self):
+        return self.soilMoistureAdapter
+
     def startManager(self) -> bool:
         logging.info("Starting SensorAdapterManager...")
         if not self.scheduler.running:

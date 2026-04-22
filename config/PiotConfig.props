@@ -87,6 +87,12 @@ waterPumpRelayGpioPin  = 27
 relayActiveLow         = False
 waterPumpMaxOnSeconds  = 30
 
+# irrigation session controls (CDA-autonomous pulse-wait-sense loop)
+waterPumpPulseOnSeconds    = 1.5
+waterPumpSettleSeconds     = 15
+waterPumpMaxPulses         = 20
+waterPumpMaxSessionSeconds = 300
+
 # LED liveness probe (GPIO22 — avoids 17=fan, 27=pump, I2C/SPI pins)
 enableLedActuator       = True
 ledGpioPin              = 22

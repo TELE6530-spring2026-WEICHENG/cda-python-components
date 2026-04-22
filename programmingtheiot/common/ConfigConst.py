@@ -274,6 +274,16 @@ PUMP_GPIO_PIN_KEY        = 'waterPumpRelayGpioPin'
 RELAY_ACTIVE_LOW_KEY     = 'relayActiveLow'
 PUMP_MAX_ON_SECONDS_KEY  = 'waterPumpMaxOnSeconds'
 
+PUMP_PULSE_ON_SECONDS_KEY    = 'waterPumpPulseOnSeconds'
+PUMP_SETTLE_SECONDS_KEY      = 'waterPumpSettleSeconds'
+PUMP_MAX_PULSES_KEY          = 'waterPumpMaxPulses'
+PUMP_MAX_SESSION_SECONDS_KEY = 'waterPumpMaxSessionSeconds'
+
+DEFAULT_PUMP_PULSE_ON_SECONDS    = 1.5
+DEFAULT_PUMP_SETTLE_SECONDS      = 15
+DEFAULT_PUMP_MAX_PULSES          = 20
+DEFAULT_PUMP_MAX_SESSION_SECONDS = 300
+
 ENABLE_LED_ACTUATOR_KEY       = 'enableLedActuator'
 LED_GPIO_PIN_KEY              = 'ledGpioPin'
 LED_WATCHDOG_TIMEOUT_SECS_KEY = 'ledWatchdogTimeoutSecs'
