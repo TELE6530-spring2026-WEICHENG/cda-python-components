@@ -1,0 +1,18 @@
+[Unit]
+Description=TELE6530 Constrained Device App (CDA)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=weicheng
+Group=weicheng
+WorkingDirectory=/home/weicheng/cda-python-components
+ExecStart=/home/weicheng/cda-python-components/.venv/bin/python -m programmingtheiot.cda.app.ConstrainedDeviceApp
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
