@@ -105,6 +105,11 @@ class LedActuatorAdapterTask(BaseActuatorSimTask):
                 self._device.off()
             except Exception:
                 logging.exception("[LED] failed to turn OFF on watchdog timeout.")
+        # Reset base-class dedup state so the next identical command from GDA
+        # is treated as a fresh activation and re-lights the LED.
+        self.lastKnownCommand = ConfigConst.DEFAULT_COMMAND
+        self.lastKnownValue = ConfigConst.DEFAULT_VAL
+        self.lastKnownState = ""
 
     def close(self):
         self._cancel_watchdog()
